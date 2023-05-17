@@ -69,7 +69,7 @@ public class IMDBStudent20201051
                 FileInputFormat.addInputPath(job, new Path(args[0]));
                 FileOutputFormat.setOutputPath(job, new Path(args[1]));
                 
-                FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
+                FileSystem.get(job.getConfiguration()).delete( new Path(args[1]), true);
 
                 job.waitForCompletion(true);
         }
