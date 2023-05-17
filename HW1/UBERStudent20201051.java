@@ -34,6 +34,9 @@ public class UBERStudent20201051 {
             DayOfWeek dayOfWeek = date.getDayOfWeek();
             String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
             
+            if (dayOfWeekString.equals("THU")) {
+                dayOfWeekString = "THR";
+            }
             // Creating the output key-value pair
             regionDay.set(baseNumber + "," + dayOfWeekString);
             tripsVehicles.set(activeVehicles + "," + trips);
