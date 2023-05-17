@@ -64,7 +64,7 @@ public class UBERStudent20201051 {
             }
 
             // Creating the output value
-            String outputValue = totalVehicles + "," + totalTrips;
+            String outputValue = totalTrips  + "," + totalVehicles;
             result.set(outputValue);
 
             context.write(key, result);
