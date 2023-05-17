@@ -26,7 +26,7 @@ public class IMDStudent20201051
                     StringTokenizer tokenizer = new StringTokenizer(genre, "|"); 
 
                     while (tokenizer.hasMoreTokens()) {
-                        String token = itr.nextToken();
+                        String token = itr.nextToken().trim();
                         word.set(token);
                         context.write(word, one);
                     }
