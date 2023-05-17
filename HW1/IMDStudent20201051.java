@@ -23,7 +23,7 @@ public class IMDStudent20201051
                     String title = itr.nextToken().trim(); 
                     String genre = itr.nextToken().trim();
 
-                    StringTokenizer tokenizer = new new StringTokenizer(genre, "|"); 
+                    StringTokenizer tokenizer = new StringTokenizer(genre, "|"); 
 
                     while (tokenizer.hasMoreTokens()) {
                         String token = itr.nextToken();
