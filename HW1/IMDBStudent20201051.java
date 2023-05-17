@@ -19,15 +19,15 @@ public class IMDBStudent20201051
             public void map(Object key, Text value, Context context) 
                 throws IOException, InterruptedException {
                     StringTokenizer itr = new StringTokenizer(value.toString(), "::"); 
-                    int id = Integer.parseInt( itr.nextToken().trim()); 
-                    itr.nextToken(); 
-                    itr.nextToken();
+                    String token = "";
+                    
+                    while( itr.hasMoreTokens() ) {
+                            token = itr.nextToken();
+                    }
 
-                    StringTokenizer tokenizer = new StringTokenizer(itr.nextToken().trim(), "|"); 
-
-                    while (tokenizer.hasMoreTokens()) {
-                        String token = itr.nextToken().trim();
-                        word.set(token);
+                    itr = new StringTokenizer( token, "|" );
+                    while (itr.hasMoreTokens()) {
+                        word.set( itr.nextToken().trim() );
                         context.write(word, one);
                     }
             }   
