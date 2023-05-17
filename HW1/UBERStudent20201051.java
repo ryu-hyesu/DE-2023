@@ -1,12 +1,19 @@
 import java.io.IOException;
-import java.util.StringTokenizer;
+import java.util.*;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.*;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.input.*;
+import org.apache.hadoop.mapreduce.lib.output.*;
+import org.apache.hadoop.util.GenericOptionsParser;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 
 public class UBERStudent20201051 {
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
@@ -18,15 +25,18 @@ public class UBERStudent20201051 {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",");
 
-            // Extracting the values from the input
             String baseNumber = tokenizer.nextToken();
-            String dayOfWeek = tokenizer.nextToken();
+            String dateString = tokenizer.nextToken();
+            int activeVehicles = Integer.parseInt(tokenizer.nextToken());
             int trips = Integer.parseInt(tokenizer.nextToken());
-            int vehicles = Integer.parseInt(tokenizer.nextToken());
 
+            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
+            
             // Creating the output key-value pair
-            regionDay.set(baseNumber + "," + dayOfWeek);
-            tripsVehicles.set(trips + "," + vehicles);
+            regionDay.set(baseNumber + "," + dayOfWeekString);
+            tripsVehicles.set(activeVehicles + "," + trips);
 
             context.write(regionDay, tripsVehicles);
         }
