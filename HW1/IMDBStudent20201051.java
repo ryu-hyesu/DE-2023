@@ -23,7 +23,7 @@ public class IMDBStudent20201051
                     itr.nextToken(); 
                     itr.nextToken();
 
-                    StringTokenizer tokenizer = new StringTokenizer(genre, "|"); 
+                    StringTokenizer tokenizer = new StringTokenizer(itr.nextToken().trim(), "|"); 
 
                     while (tokenizer.hasMoreTokens()) {
                         String token = itr.nextToken().trim();
