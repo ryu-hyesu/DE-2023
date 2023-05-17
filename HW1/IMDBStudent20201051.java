@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-public class IMDStudent20201051
+public class IMDBStudent20201051
 {
         public static class Map extends Mapper<Object, Text, Text, LongWritable>{
             private final static LongWritable one = new LongWritable(1);
@@ -53,9 +53,9 @@ public class IMDStudent20201051
         public static void main(String[] args) throws Exception
         {
                 Configuration conf = new Configuration();
-                Job job = new Job(conf, "IMDStudent20201051");
+                Job job = new Job(conf, "IMDBStudent20201051");
 
-                job.setJarByClass(IMDStudent20201051.class);
+                job.setJarByClass(IMDBStudent20201051.class);
                 job.setMapperClass(Map.class);
                 job.setCombinerClass(Reduce.class);
                 job.setReducerClass(Reduce.class);
