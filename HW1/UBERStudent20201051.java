@@ -56,8 +56,8 @@ public class UBERStudent20201051 {
             // Calculating the sum of trips and vehicles for the same region and day
             for (Text value : values) {
                 String[] parts = value.toString().split(",");
-                int trips = Integer.parseInt(parts[0]);
-                int vehicles = Integer.parseInt(parts[1]);
+                int trips = Integer.parseInt(parts[1]);
+                int vehicles = Integer.parseInt(parts[0]);
 
                 totalTrips += trips;
                 totalVehicles += vehicles;
