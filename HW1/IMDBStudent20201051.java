@@ -20,8 +20,8 @@ public class IMDBStudent20201051
                 throws IOException, InterruptedException {
                     StringTokenizer itr = new StringTokenizer(value.toString(), "::"); 
                     int id = Integer.parseInt( itr.nextToken().trim()); 
-                    String title = itr.nextToken().trim(); 
-                    String genre = itr.nextToken().trim();
+                    itr.nextToken(); 
+                    itr.nextToken();
 
                     StringTokenizer tokenizer = new StringTokenizer(genre, "|"); 
 
