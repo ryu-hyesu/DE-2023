@@ -82,7 +82,7 @@ public class IMDBStudent20201051
       for ( int i = 0 ; i < buffer.size(); i++ )
       {
         reduce_key.set(description);
-        reduce_result.set(buffer[i]);
+        reduce_result.set(buffer.get(i));
         context.write(reduce_key, reduce_result);
       }
     }
