@@ -33,35 +33,49 @@ public class YouTubeStudent20201051
   
   public static class ReduceSideJoinReducer extends Reducer<Text,DoubleWritable,Text,DoubleWritable>
   {
-    private DoubleWritable avgRating = new DoubleWritable();
+    private int K;
+    private TreeMap<Double, String> categoryRatingsMap;
+
+    public void setup(Context context) {
+        Configuration conf = context.getConfiguration();
+        K = conf.getInt("K", 1);
+        categoryRatingsMap = new TreeMap<>();
+    }
+    
     public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, 
     InterruptedException {
-      double sum = 0;
-      int count = 0;
-      for (DoubleWritable val : values) {
-          sum += val.get();
-          count++;
+      for (Text value : values) {
+          String[] fields = value.toString().split("|");
+        
+          if (fields.length >= 2) {
+              String category = fields[0];
+              double rating = Double.parseDouble(fields[1]);
+              categoryRatingsMap.put(rating, category);
+              if (categoryRatingsMap.size() > K) {
+                  categoryRatingsMap.remove(categoryRatingsMap.firstKey());
+              }
+          }
       }
-      double average = sum / count;
-      avgRating.set(average);
-      context.write(key, avgRating);
+      for (Map.Entry<Double, String> entry : categoryRatingsMap.entrySet()) {
+          double rating = entry.getKey();
+          String category = entry.getValue();
+          context.write(new Text(category), new DoubleWritable(rating));
+      }
     }
   }
   
   
  public static void main(String[] args) throws Exception
   {
-  Configuration conf = new Configuration();
-  String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-  int topK = 3;
+  
    
-  if (otherArgs.length != 2)
+  if (otherArgs.length != 3)
   {
     System.err.println("Usage: ReduceSideJoin <in> <out>");
     System.exit(2);
   }
-   
-  conf.setInt("topK", topK);
+  
+  Configuration conf = new Configuration();
   Job job = new Job(conf, "YouTubeStudent20201051");
   job.setJarByClass(YouTubeStudent20201051.class);
   job.setMapperClass(ReduceSideJoinMapper.class);
@@ -70,6 +84,10 @@ public class YouTubeStudent20201051
   job.setOutputValueClass(Text.class);
   FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
   FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
+  
+   int K = Integer.parseInt(args[2]);
+        job.getConfiguration().setInt("K", K);
+   
   FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
   System.exit(job.waitForCompletion(true) ? 0 : 1);
   }
