@@ -20,7 +20,7 @@ public class YouTubeStudent20201051
     
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException
     {
-      String[] fields = line.split("|");
+      String[] fields = value.toString().split("|");
       
       category.set(fields[3]);
       rating.set(Double.parseDouble(fields[6]));
@@ -33,6 +33,7 @@ public class YouTubeStudent20201051
   
   public static class ReduceSideJoinReducer extends Reducer<Text,DoubleWritable,Text,DoubleWritable>
   {
+    private DoubleWritable avgRating = new DoubleWritable();
     public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, 
     InterruptedException {
       double sum = 0;
