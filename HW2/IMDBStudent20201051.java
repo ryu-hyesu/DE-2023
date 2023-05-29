@@ -1,3 +1,5 @@
+import java.util.PriorityQueue;
+import java.util.Collections;
 import java.io.IOException;
 import java.util.*;
 import org.apache.hadoop.conf.*;
@@ -9,6 +11,7 @@ import org.apache.hadoop.mapred.lib.*;
 import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
+
 class Emp {
     public String title;
     public double rate;
