@@ -10,9 +10,7 @@ import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-public class YouTubeStudent20201051
-{
-  public class CategoryRating {
+class CategoryRating {
     private String category;
     private double averageRating;
 
@@ -34,6 +32,10 @@ public class YouTubeStudent20201051
         return category + " " + averageRating;
     }
 }
+
+public class YouTubeStudent20201051
+{
+  
   
   public static class TopKMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
     private Text category = new Text();
