@@ -98,6 +98,18 @@ public class IMDBStudent20201051
   
   public static class ReduceSideJoinReducer extends Reducer<Text,Text,Text,DoubleWritable>
   {
+	  private PriorityQueue<Emp> queue ;
+    private Comparator<Emp> comp = new EmpComparator();
+    private int topK;
+	  
+	Text reduce_key = new Text();
+	DoubleWritable o_value = new DoubleWritable();  
+
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        topK = conf.getInt("topK", -1);
+        queue = new PriorityQueue<Emp>( topK , comp);
+    }
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, 
     InterruptedException {
       Text reduce_key = new Text();
