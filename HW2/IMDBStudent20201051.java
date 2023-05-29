@@ -127,7 +127,7 @@ public class IMDBStudent20201051
       
       double average = sum / count; 
       
-      insertEmp(queue, key.title, average, topK);
+      insertEmp(queue, title, average, topK);
     }
     
     protected void cleanup(Context context) throws IOException, InterruptedException {
