@@ -23,7 +23,7 @@ class Emp {
     
     public String getString()
     {
-        return category + " " + averageRating;
+        return category + "|" + averageRating;
     }
 }
 
@@ -57,7 +57,7 @@ public class YouTubeStudent20201051
 	DoubleWritable rating = new DoubleWritable();
     	
 	String line = value.toString();
-        StringTokenizer tokenizer = new StringTokenizer(line, "|");
+        StringTokenizer tokenizer = new StringTokenizer(line, "\\|");
 	
 
 	String data1 = tokenizer.nextToken();
