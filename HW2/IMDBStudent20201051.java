@@ -9,10 +9,7 @@ import org.apache.hadoop.mapred.lib.*;
 import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
-
-public class IMDBStudent20201051
-{
-  class Emp {
+class Emp {
     public String title;
     public double rate;
     
@@ -46,6 +43,9 @@ class EmpComparator implements Comparator<Emp> {
             if (q.size() > topK) q.remove();
         }
     }
+public class IMDBStudent20201051
+{
+  
 
   public static class ReduceSideJoinMapper extends Mapper<Object, Text, Text, Text>
   {
