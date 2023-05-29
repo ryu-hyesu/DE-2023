@@ -23,7 +23,7 @@ class Emp {
     
     public String getString()
     {
-        return category + "," + averageRating;
+        return category + " " + averageRating;
     }
 }
 
