@@ -10,59 +10,66 @@ import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-class CategoryRating {
-    private String category;
-    private double averageRating;
-
-    public CategoryRating(String category, double averageRating) {
+public class Emp {
+    public String category;
+    public double averageRating;
+    
+    public Emp(String category, double averageRating) {
         this.category = category;
         this.averageRating = averageRating;
     }
-
-    public String getCategory() {
-        return category;
+    
+    public String getString()
+    {
+        return category + "," + averageRating;
     }
+}
 
-    public double getAverageRating() {
-        return averageRating;
+public static class EmpComparator implements Comparator<Emp> {
+    public int compare(Emp x, Emp y) {
+        if ( x.averageRating > y.averageRating ) return 1;
+        if ( x.averageRating < y.averageRating ) return -1;
+        return 0;
     }
+}
 
-    @Override
-    public String toString() {
-        return category + " " + averageRating;
-    }
+public static void insertEmp(PriorityQueue q, String category, double averageRating, int topK) {
+        Emp emp_head = (Emp) q.peek();
+        if ( q.size() < topK || emp_head.averageRating < averageRating )
+        {
+            Emp emp = new Emp(category, averageRating);
+            q.add( emp );
+            if( q.size() > topK ) q.remove();
+        }
 }
 
 public class YouTubeStudent20201051
 {
+
   
-  
-  public static class TopKMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+  public static class TopKMapper extends Mapper<Object, Text, Text, DoubleWritable> {
     private Text category = new Text();
     private DoubleWritable rating = new DoubleWritable();
 
-    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         String[] fields = value.toString().split("|");
 
         if (fields.length >= 7) {
             String category = fields[3];
             double rating = Double.parseDouble(fields[6]);
-
+            
             context.write(new Text(category), new DoubleWritable(rating));
         }
     }
+      
 }
 
   public static class TopKReducer extends Reducer<Text, DoubleWritable, Text, NullWritable> {
-    private PriorityQueue<CategoryRating> topCategories;
+    private PriorityQueue<Emp> queue ;
+    private Comparator<Emp> comp = new EmpComparator();
     private int topK;
 
-    protected void setup(Context context) {
-        topCategories = new PriorityQueue<>(topK, Comparator.comparingDouble(CategoryRating::getAverageRating));
-        topK = context.getConfiguration().getInt("topK", 10);
-    }
-
-    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
+    public void reduce(Text key, Iterable<NullWritable> values, Context context)
             throws IOException, InterruptedException {
         double sum = 0;
         int count = 0;
@@ -72,28 +79,28 @@ public class YouTubeStudent20201051
             count++;
         }
 
-        double average = sum / count;
-        CategoryRating categoryRating = new CategoryRating(key.toString(), average);
-
-        topCategories.add(categoryRating);
-
-        // Keep only top K categories in the PriorityQueue
-        if (topCategories.size() > topK) {
-            topCategories.poll();
+        double average = sum / count; // 평균
+        
+        insertEmp(queue, key.toString(), average, topK);
         }
     }
 
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        topK = conf.getInt("topK", -1);
+        queue = new PriorityQueue<Emp>( topK , comp);
+    }
+      
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        // Emit the top K categories in descending order of average rating
-        while (!topCategories.isEmpty()) {
-            CategoryRating categoryRating = topCategories.poll();
-            context.write(new Text(categoryRating.toString()), NullWritable.get());
-        }
+        while( queue.size() != 0 ) {
+        Emp emp = (Emp) queue.remove();
+        context.write( new Text( emp.getString() ), NullWritable.get() );
+      }
     }
 }
 
   public static void main(String[] args) throws Exception {
-    Configuration conf = new Configuration();
+        Configuration conf = new Configuration();
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     
     if (otherArgs.length != 3) {
@@ -129,7 +136,7 @@ public class YouTubeStudent20201051
     
 
     System.exit(job.waitForCompletion(true) ? 0 : 1);
-}
+    }
 
  
 }
