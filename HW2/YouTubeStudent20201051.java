@@ -77,10 +77,13 @@ public class YouTubeStudent20201051
       
 }
 
-  public static class TopKReducer extends Reducer<Text, DoubleWritable, Text, NullWritable> {
+  public static class TopKReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
     private PriorityQueue<Emp> queue ;
     private Comparator<Emp> comp = new EmpComparator();
     private int topK;
+	  
+	Text reduce_key = new Text();
+	DoubleWritable o_value = new DoubleWritable();  
 
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
@@ -108,7 +111,10 @@ public class YouTubeStudent20201051
     protected void cleanup(Context context) throws IOException, InterruptedException {
         while( queue.size() != 0 ) {
         Emp emp = (Emp) queue.remove();
-        context.write( new Text( emp.getString() ), NullWritable.get() );
+		
+        reduce_key.set(emp.category);
+	o_value.set(emp.averageRating);
+	context.write(reduce_key, o_value);
       }
     }
 }
@@ -129,8 +135,8 @@ public class YouTubeStudent20201051
 	job.setMapperClass(TopKMapper.class);
 	job.setReducerClass(TopKReducer.class);
 	job.setOutputKeyClass(Text.class);
-	job.setOutputValueClass(NullWritable.class);
-	job.setMapOutputValueClass(DoubleWritable.class);
+	job.setOutputValueClass(DoubleWritable.class);
+	// job.setMapOutputValueClass(DoubleWritable.class);
 
 	FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
 	FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
