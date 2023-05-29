@@ -35,35 +35,45 @@ class EmpComparator implements Comparator<Emp> {
     }
 
     
-	public static void insertEmp(PriorityQueue q, String category, double averageRating, int topK) {
-        Emp emp_head = (Emp) q.peek();
-        if ( q.size() < topK || emp_head.averageRating < averageRating )
-        {
-            Emp emp = new Emp(category, averageRating);
-            q.add( emp );
-            	if( q.size() > topK ) q.remove();
-        }
-}
-
 }
 
 public class YouTubeStudent20201051
 {
-
+	public static void insertEmp(PriorityQueue<Emp> q, String category, double averageRating, int topK) {
+        Emp emp_head = q.peek();
+        if (q.size() < topK || emp_head.averageRating < averageRating) {
+            Emp emp = new Emp(category, averageRating);
+            q.add(emp);
+            if (q.size() > topK) q.remove();
+        }
+    }
   
+    // 오류남
   public static class TopKMapper extends Mapper<Object, Text, Text, DoubleWritable> {
     private Text category = new Text();
     private DoubleWritable rating = new DoubleWritable();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        String[] fields = value.toString().split("|");
+        	
+	    String line = value.toString();
+            StringTokenizer tokenizer = new StringTokenizer(line, "|");
 
-        if (fields.length >= 7) {
-            String category = fields[3];
-            double rating = Double.parseDouble(fields[6]);
+		String id = tokenizer.nextToken();
+		String title = tokenizer.nextToken(); // 오류남!!!!
+		String genre = tokenizer.nextToken(); // 장르
+		String name = tokenizer.nextToken();
+		String num1 = tokenizer.nextToken();
+		String num2 = tokenizer.nextToken();
+		Double score = Double.parseDouble(tokenizer.nextToken()); // 점수
+        
             
-            context.write(new Text(category), new DoubleWritable(rating));
-        }
+           
+	    
+	    category.set(title);
+	    rating.set(score);
+
+            context.write(category, rating);
+     
     }
       
 }
@@ -73,7 +83,13 @@ public class YouTubeStudent20201051
     private Comparator<Emp> comp = new EmpComparator();
     private int topK;
 
-    public void reduce(Text key, Iterable<NullWritable> values, Context context)
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        topK = conf.getInt("topK", -1);
+        queue = new PriorityQueue<Emp>( topK , comp);
+    }
+
+    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
             throws IOException, InterruptedException {
         double sum = 0;
         int count = 0;
@@ -86,14 +102,9 @@ public class YouTubeStudent20201051
         double average = sum / count; // 평균
         
         insertEmp(queue, key.toString(), average, topK);
-        }
+        
     }
 
-    protected void setup(Context context) throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        topK = conf.getInt("topK", -1);
-        queue = new PriorityQueue<Emp>( topK , comp);
-    }
       
     protected void cleanup(Context context) throws IOException, InterruptedException {
         while( queue.size() != 0 ) {
@@ -116,7 +127,7 @@ public class YouTubeStudent20201051
 	conf.setInt("topK", topK);
 	Job job = new Job(conf, "TopK");
 
-	job.setJarByClass(TopK.class);
+	job.setJarByClass(YouTubeStudent20201051.class);
 	job.setMapperClass(TopKMapper.class);
 	job.setReducerClass(TopKReducer.class);
 	job.setOutputKeyClass(Text.class);
