@@ -12,70 +12,99 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class YouTubeStudent20201051
 {
+  public class CategoryRating {
+    private String category;
+    private double averageRating;
 
-  public static class ReduceSideJoinMapper extends Mapper<Object, Text, Text, DoubleWritable>
-  {
+    public CategoryRating(String category, double averageRating) {
+        this.category = category;
+        this.averageRating = averageRating;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    @Override
+    public String toString() {
+        return category + " " + averageRating;
+    }
+}
+  
+  public static class TopKMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
     private Text category = new Text();
     private DoubleWritable rating = new DoubleWritable();
-    
-    public void map(Object key, Text value, Context context) throws IOException, InterruptedException
-    {
-      String[] fields = value.toString().split("|");
-      
-      category.set(fields[3]);
-      rating.set(Double.parseDouble(fields[6]));
-      
-      context.write(category, rating);
-    }
-    
-  }
-  
-  
-  public static class ReduceSideJoinReducer extends Reducer<Text,DoubleWritable,Text,DoubleWritable>
-  {
-    private int K;
-    private TreeMap<Double, String> categoryRatingsMap;
 
-    public void setup(Context context) {
-        Configuration conf = context.getConfiguration();
-        K = conf.getInt("K", 1);
-        categoryRatingsMap = new TreeMap<>();
+    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+        String[] fields = value.toString().split("|");
+
+        if (fields.length >= 7) {
+            String category = fields[3];
+            double rating = Double.parseDouble(fields[6]);
+
+            context.write(new Text(category), new DoubleWritable(rating));
+        }
     }
-    
-    public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, 
-    InterruptedException {
-      for (Text value : values) {
-          String[] fields = value.toString().split("|");
-        
-          if (fields.length >= 2) {
-              String category = fields[0];
-              double rating = Double.parseDouble(fields[1]);
-              categoryRatingsMap.put(rating, category);
-              if (categoryRatingsMap.size() > K) {
-                  categoryRatingsMap.remove(categoryRatingsMap.firstKey());
-              }
-          }
-      }
-      for (Map.Entry<Double, String> entry : categoryRatingsMap.entrySet()) {
-          double rating = entry.getKey();
-          String category = entry.getValue();
-          context.write(new Text(category), new DoubleWritable(rating));
-      }
+}
+
+  public static class TopKReducer extends Reducer<Text, DoubleWritable, Text, NullWritable> {
+    private PriorityQueue<CategoryRating> topCategories;
+    private int topK;
+
+    protected void setup(Context context) {
+        topCategories = new PriorityQueue<>(topK, Comparator.comparingDouble(CategoryRating::getAverageRating));
+        topK = context.getConfiguration().getInt("topK", 10);
     }
-  }
+
+    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
+            throws IOException, InterruptedException {
+        double sum = 0;
+        int count = 0;
+
+        for (DoubleWritable value : values) {
+            sum += value.get();
+            count++;
+        }
+
+        double average = sum / count;
+        CategoryRating categoryRating = new CategoryRating(key.toString(), average);
+
+        topCategories.add(categoryRating);
+
+        // Keep only top K categories in the PriorityQueue
+        if (topCategories.size() > topK) {
+            topCategories.poll();
+        }
+    }
+
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        // Emit the top K categories in descending order of average rating
+        while (!topCategories.isEmpty()) {
+            CategoryRating categoryRating = topCategories.poll();
+            context.write(new Text(categoryRating.toString()), NullWritable.get());
+        }
+    }
+}
+
   
   
  public static void main(String[] args) throws Exception
   {
   
    
-  if (otherArgs.length != 3)
-  {
-    System.err.println("Usage: ReduceSideJoin <in> <out>");
-    System.exit(2);
-  }
-  
-  Configuration conf = new Configuration();
+  if (args.length != 3) {
+        System.err.println("Usage: TopKCategories <inputPath> <outputPath> <topK>");
+        System.exit(1);
+    }
+
+    Configuration conf = new Configuration();
+    conf.setInt("topK", Integer.parseInt(args[2]));
+
+   
   Job job = new Job(conf, "YouTubeStudent20201051");
   job.setJarByClass(YouTubeStudent20201051.class);
   job.setMapperClass(ReduceSideJoinMapper.class);
@@ -84,9 +113,6 @@ public class YouTubeStudent20201051
   job.setOutputValueClass(Text.class);
   FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
   FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
-  
-   int K = Integer.parseInt(args[2]);
-        job.getConfiguration().setInt("K", K);
    
   FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
   System.exit(job.waitForCompletion(true) ? 0 : 1);
