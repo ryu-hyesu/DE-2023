@@ -78,7 +78,7 @@ public class IMDBStudent20201051
       else { // rating
         itr.nextToken(); // id key
         joinKey = itr.nextToken().trim(); // movie id
-        o_value += "B," + itr.nextToken().trim(); // rating
+        o_value = "B," + itr.nextToken().trim(); // rating
       }
       
       outputKey.set( joinKey );
@@ -120,7 +120,7 @@ public class IMDBStudent20201051
       
       int sum = 0;
       int count = 0;
-      String title;
+      String title = "";
       
       for (Text val : values) {
         String file_type;
@@ -133,7 +133,7 @@ public class IMDBStudent20201051
           count++;
         }
         else { // A일때 title이 key.
-          title = itr.nextToken();
+          title += itr.nextToken();
         }
       }
       
