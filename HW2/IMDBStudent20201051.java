@@ -58,8 +58,8 @@ public class IMDBStudent20201051
       StringTokenizer itr = new StringTokenizer(value.toString(), "::");
       Text outputKey = new Text();
       Text outputValue = new Text();
-      String joinKey;
-      String o_value;
+      String joinKey = "";
+      String o_value = "";
       
       if( fileA ) { // moive
         String id = itr.nextToken().trim(); // movie id
@@ -68,8 +68,8 @@ public class IMDBStudent20201051
         
         while( itr.hasMoreTokens() ) {
           if( itr.nextToken().equals("Fantasy") ) {
-              joinKey = id;
-              o_value = "A," + title;
+              joinKey += id;
+              o_value += "A," + title;
               break;
           }
         }
@@ -77,8 +77,8 @@ public class IMDBStudent20201051
       }
       else { // rating
         itr.nextToken(); // id key
-        joinKey = itr.nextToken().trim(); // movie id
-        o_value = "B," + itr.nextToken().trim(); // rating
+        joinKey += itr.nextToken().trim(); // movie id
+        o_value += "B," + itr.nextToken().trim(); // rating
       }
       
       outputKey.set( joinKey );
