@@ -117,12 +117,11 @@ public class YouTubeStudent20201051
   	Configuration conf = new Configuration();
 	String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-	int topK = 2;
-
-	if (otherArgs.length != 2) {
+	if (otherArgs.length != 3) {
 		System.err.println("Usage: TopK <in> <out>");   System.exit(2);
 	}
-
+	  
+	int topK = Integer.parseInt(otherArgs[2]);
 	conf.setInt("topK", topK);
 	Job job = new Job(conf, "TopK");
 
