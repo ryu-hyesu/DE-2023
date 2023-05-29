@@ -90,31 +90,44 @@ public class YouTubeStudent20201051
     }
 }
 
-  
-  
- public static void main(String[] args) throws Exception
-  {
-  
-   
-  if (args.length != 3) {
-        System.err.println("Usage: TopKCategories <inputPath> <outputPath> <topK>");
-        System.exit(1);
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+    
+    if (otherArgs.length != 3) {
+        System.err.println("Usage: TopK <inputPath> <outputPath> <topK>");
+        System.exit(2);
     }
 
-    Configuration conf = new Configuration();
-    conf.setInt("topK", Integer.parseInt(args[2]));
+    String inputPath = otherArgs[0];
+    String outputPath = otherArgs[1];
+    int topK = Integer.parseInt(otherArgs[2]);
 
-   
-  Job job = new Job(conf, "YouTubeStudent20201051");
-  job.setJarByClass(YouTubeStudent20201051.class);
-  job.setMapperClass(ReduceSideJoinMapper.class);
-  job.setReducerClass(ReduceSideJoinReducer.class);
-  job.setOutputKeyClass(Text.class);
-  job.setOutputValueClass(Text.class);
-  FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
-  FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
-   
-  FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
-  System.exit(job.waitForCompletion(true) ? 0 : 1);
-  }
+    conf.setInt("topK", topK);
+
+    Job job = Job.getInstance(conf, "TopK");
+    job.setJarByClass(YouTubeStudent20201051.class);
+
+    // Mapper 설정
+    job.setMapperClass(TopKMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(DoubleWritable.class);
+
+    // Reducer 설정
+    job.setReducerClass(TopKReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(NullWritable.class);
+
+    // 입력 및 출력 경로 설정
+    FileInputFormat.addInputPath(job, new Path(inputPath));
+    FileOutputFormat.setOutputPath(job, new Path(outputPath));
+
+    // 출력 디렉토리 삭제
+    FileSystem.get(conf).delete(new Path(outputPath), true);
+    
+
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+}
+
+ 
 }
