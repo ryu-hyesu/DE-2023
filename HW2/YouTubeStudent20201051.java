@@ -1,3 +1,5 @@
+import java.util.PriorityQueue;
+import java.util.Collections;
 import java.io.IOException;
 import java.util.*;
 import org.apache.hadoop.conf.*;
@@ -10,7 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-public class Emp {
+class Emp {
     public String category;
     public double averageRating;
     
@@ -25,41 +27,52 @@ public class Emp {
     }
 }
 
-public static class EmpComparator implements Comparator<Emp> {
+class EmpComparator implements Comparator<Emp> {
     public int compare(Emp x, Emp y) {
         if ( x.averageRating > y.averageRating ) return 1;
         if ( x.averageRating < y.averageRating ) return -1;
         return 0;
     }
-}
 
-public static void insertEmp(PriorityQueue q, String category, double averageRating, int topK) {
-        Emp emp_head = (Emp) q.peek();
-        if ( q.size() < topK || emp_head.averageRating < averageRating )
-        {
-            Emp emp = new Emp(category, averageRating);
-            q.add( emp );
-            if( q.size() > topK ) q.remove();
-        }
+    
 }
 
 public class YouTubeStudent20201051
 {
-
+	public static void insertEmp(PriorityQueue<Emp> q, String category, double averageRating, int topK) {
+        Emp emp_head = q.peek();
+        if (q.size() < topK || emp_head.averageRating < averageRating) {
+            Emp emp = new Emp(category, averageRating);
+            q.add(emp);
+            if (q.size() > topK) q.remove();
+        }
+    }
   
+    // error!
   public static class TopKMapper extends Mapper<Object, Text, Text, DoubleWritable> {
-    private Text category = new Text();
-    private DoubleWritable rating = new DoubleWritable();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        String[] fields = value.toString().split("|");
+       
+	Text category = new Text();
+	DoubleWritable rating = new DoubleWritable();
+    	
+	String line = value.toString();
+        StringTokenizer tokenizer = new StringTokenizer(line, "|");
+	
 
-        if (fields.length >= 7) {
-            String category = fields[3];
-            double rating = Double.parseDouble(fields[6]);
-            
-            context.write(new Text(category), new DoubleWritable(rating));
-        }
+	String data1 = tokenizer.nextToken();
+	String data2 = tokenizer.nextToken();
+	String data3 = tokenizer.nextToken();
+	String cate = tokenizer.nextToken().trim();
+	String data4 = tokenizer.nextToken();
+	String data5 = tokenizer.nextToken();
+	Double score = Double.parseDouble(tokenizer.nextToken().trim());
+
+	category.set(cate);
+	rating.set(score);
+
+	context.write(category, rating); // error!!
+     
     }
       
 }
@@ -69,7 +82,13 @@ public class YouTubeStudent20201051
     private Comparator<Emp> comp = new EmpComparator();
     private int topK;
 
-    public void reduce(Text key, Iterable<NullWritable> values, Context context)
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        topK = conf.getInt("topK", -1);
+        queue = new PriorityQueue<Emp>( topK , comp);
+    }
+
+    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
             throws IOException, InterruptedException {
         double sum = 0;
         int count = 0;
@@ -82,14 +101,9 @@ public class YouTubeStudent20201051
         double average = sum / count; // 평균
         
         insertEmp(queue, key.toString(), average, topK);
-        }
+        
     }
 
-    protected void setup(Context context) throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        topK = conf.getInt("topK", -1);
-        queue = new PriorityQueue<Emp>( topK , comp);
-    }
       
     protected void cleanup(Context context) throws IOException, InterruptedException {
         while( queue.size() != 0 ) {
@@ -100,43 +114,31 @@ public class YouTubeStudent20201051
 }
 
   public static void main(String[] args) throws Exception {
-        Configuration conf = new Configuration();
-    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-    
-    if (otherArgs.length != 3) {
-        System.err.println("Usage: TopK <inputPath> <outputPath> <topK>");
-        System.exit(2);
-    }
+  	Configuration conf = new Configuration();
+	String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-    String inputPath = otherArgs[0];
-    String outputPath = otherArgs[1];
-    int topK = Integer.parseInt(otherArgs[2]);
+	int topK = 2;
 
-    conf.setInt("topK", topK);
+	if (otherArgs.length != 2) {
+		System.err.println("Usage: TopK <in> <out>");   System.exit(2);
+	}
 
-    Job job = Job.getInstance(conf, "TopK");
-    job.setJarByClass(YouTubeStudent20201051.class);
+	conf.setInt("topK", topK);
+	Job job = new Job(conf, "TopK");
 
-    // Mapper 설정
-    job.setMapperClass(TopKMapper.class);
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(DoubleWritable.class);
+	job.setJarByClass(YouTubeStudent20201051.class);
+	job.setMapperClass(TopKMapper.class);
+	job.setReducerClass(TopKReducer.class);
+	job.setOutputKeyClass(Text.class);
+	job.setOutputValueClass(NullWritable.class);
+	job.setMapOutputValueClass(DoubleWritable.class);
 
-    // Reducer 설정
-    job.setReducerClass(TopKReducer.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(NullWritable.class);
+	FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
+	FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 
-    // 입력 및 출력 경로 설정
-    FileInputFormat.addInputPath(job, new Path(inputPath));
-    FileOutputFormat.setOutputPath(job, new Path(outputPath));
-
-    // 출력 디렉토리 삭제
-    FileSystem.get(conf).delete(new Path(outputPath), true);
-    
-
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
-    }
+	FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
+	System.exit(job.waitForCompletion(true) ? 0 : 1);  
+  }
 
  
 }
