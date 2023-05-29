@@ -35,6 +35,9 @@ class EmpComparator implements Comparator<Emp> {
 }
   
 
+  
+public class IMDBStudent20201051
+{
   public static void insertEmp(PriorityQueue<Emp> q, String title, double rate, int topK) {
         Emp emp_head = q.peek();
         if (q.size() < topK || emp_head.rate < rate) {
@@ -43,9 +46,6 @@ class EmpComparator implements Comparator<Emp> {
             if (q.size() > topK) q.remove();
         }
     }
-public class IMDBStudent20201051
-{
-  
 
   public static class ReduceSideJoinMapper extends Mapper<Object, Text, Text, Text>
   {
