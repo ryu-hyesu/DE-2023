@@ -166,8 +166,8 @@ public class IMDBStudent20201051
 	Job job = new Job(conf, "TopK");
 
 	job.setJarByClass(YouTubeStudent20201051.class);
-	job.setMapperClass(TopKMapper.class);
-	job.setReducerClass(TopKReducer.class);
+	job.setMapperClass(ReduceSideJoinMapper.class);
+	job.setReducerClass(ReduceSideJoinReducer.class);
 	job.setOutputKeyClass(Text.class);
 	job.setOutputValueClass(DoubleWritable.class);
 	// job.setMapOutputValueClass(DoubleWritable.class);
