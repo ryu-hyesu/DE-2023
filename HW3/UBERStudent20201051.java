@@ -2,6 +2,8 @@ import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
 import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;
+//Compiling 1 source file to /home/bigdata/lab.spark/build/classes
+  //  [javac] /home/bigdata/lab.spark/src/UBERStudent20201051.java:45: error: ')' expected
 
 public final class UBERStudent20201051 {
     public static void main(String[] args) {
