@@ -52,7 +52,7 @@ public final class UBERStudent20201051 {
             int totalTrips = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
             int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
 
-            return new Tuple2<>(totalVehicles, totalTrips);
+            return new Tuple2<>(totalTrips,totalVehicles);
         });
 
         regionDayTotalTripsVehicles.saveAsTextFile(args[1]);
