@@ -10,7 +10,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-//g
+
 public final class UBERStudent20201051 {
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -45,9 +45,9 @@ public final class UBERStudent20201051 {
             return new Tuple2<>(key, value);
         });
 
-        JavaPairRDD<String, Tuple2<Integer, Integer>> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>, Tuple2<Integer, Integer>>) (v1, v2) -> {
-            String[] parts1 = v1._2().split(",");
-            String[] parts2 = v2._2().split(",");
+        JavaPairRDD<String, Tuple2<Integer, Integer>> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<String, String, Tuple2<Integer, Integer>>) (v1, v2) -> {
+            String[] parts1 = v1.split(",");
+            String[] parts2 = v2.split(",");
 
             int totalTrips = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
             int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
