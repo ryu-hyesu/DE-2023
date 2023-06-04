@@ -1,37 +1,49 @@
+import scala.Tuple2;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
-import org.apache.spark.sql.SparkSession;
-import scala.Tuple2;
-
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class IMDBStudent20201051 {
-    public static void main(String[] args) {
+public final class IMDBGenreCount implements Serializable {
+    public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.err.println("Usage: IMDBStudent20201051 <in-file> <out-file>");
+            System.err.println("Usage: IMDBGenreCount <in-file> <out-file>");
             System.exit(1);
         }
 
-        SparkSession spark = SparkSession.builder()
-                .appName("IMDBStudent20201051")
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("IMDBGenreCount")
                 .getOrCreate();
 
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
-        JavaRDD<String> words = lines.flatMap((FlatMapFunction<String, String>) s -> {
-            String title = s.split("::")[2];
-            return Arrays.asList(title.split("|")).iterator();
+        JavaPairRDD<String, Integer> counts = lines.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
+            @Override
+            public Iterator<Tuple2<String, Integer>> call(String line) throws Exception {
+                String[] parts = line.split("::");
+                String[] genres = parts[2].split("\\|");
+
+                List<Tuple2<String, Integer>> genreCounts = new ArrayList<>();
+
+                for (String genre : genres) {
+                    genreCounts.add(new Tuple2<>(genre, 1));
+                }
+
+                return genreCounts.iterator();
+            }
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer count1, Integer count2) throws Exception {
+                return count1 + count2;
+            }
         });
 
-        JavaPairRDD<String, Integer> ones = words.mapToPair((PairFunction<String, String, Integer>) word -> new Tuple2<>(word, 1));
-
-        JavaPairRDD<String, Integer> counts = ones.reduceByKey((Function2<Integer, Integer, Integer>) (x, y) -> x + y);
-
         counts.saveAsTextFile(args[1]);
-
         spark.stop();
     }
 }
