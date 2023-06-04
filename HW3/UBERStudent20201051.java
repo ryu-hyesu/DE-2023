@@ -39,20 +39,21 @@ public final class UBERStudent20201051 {
                 dayOfWeekString = "THR";
             }
 
+  
             String key = baseNumber + "," + dayOfWeekString;
             String value = activeVehicles + "," + trips;
 
             return new Tuple2<>(key, value);
         });
 
-        JavaPairRDD<String, Tuple2<Integer, Integer>> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<String, String, Tuple2<Integer, Integer>>) (v1, v2) -> {
+        JavaPairRDD<String, String> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<String, String, String>) (v1, v2) -> {
             String[] parts1 = v1.split(",");
             String[] parts2 = v2.split(",");
 
             int totalTrips = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
             int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
 
-            return new Tuple2<>(totalTrips,totalVehicles);
+            return totalTrips  + "," + totalVehicles ;
         });
 
         regionDayTotalTripsVehicles.saveAsTextFile(args[1]);
