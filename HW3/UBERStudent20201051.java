@@ -44,7 +44,7 @@ public final class UBERStudent20201051 {
             return new Tuple2<>(key, new Tuple2<>(activeVehicles, trips));
         });
 
-        JavaPairRDD<String, Tuple2<Integer, Integer>> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>, Tuple2<Integer, Integer>>>) (v1, v2) -> {
+        JavaPairRDD<String, Tuple2<Integer, Integer>> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey(Function2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>, Tuple2<Integer, Integer>>>) (v1, v2) -> {
             int totalVehicles = v1._1() + v2._1();
             int totalTrips = v1._2() + v2._2();
 
