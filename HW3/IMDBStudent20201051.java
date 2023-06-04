@@ -15,7 +15,7 @@ public final class IMDBStudent20201051 implements Serializable {
             System.exit(1);
         }
         
-        SparkSession spark = SparkSession.builder()
+        SparkSession spark = SparkSession
                 .builder()
                 .appName("IMDBStudent20201051")
                 .getOrCreate();
