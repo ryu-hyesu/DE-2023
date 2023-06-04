@@ -8,15 +8,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class JavaWordCount implements Serializable {
+public final class IMDBStudent20201051 implements Serializable {
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.err.println("Usage: JavaWordCount <in-file> <out-file>");
+            System.err.println("Usage: IMDBStudent20201051 <in-file> <out-file>");
             System.exit(1);
         }
         
         SparkSession spark = SparkSession.builder()
-                .appName("JavaWordCount")
+                .builder()
+                .appName("IMDBStudent20201051")
                 .getOrCreate();
         
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
