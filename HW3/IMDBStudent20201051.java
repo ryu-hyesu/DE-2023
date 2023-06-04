@@ -22,8 +22,8 @@ public final class IMDBStudent20201051 {
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
         JavaRDD<String> words = lines.flatMap((FlatMapFunction<String, String>) s -> {
-            String title = s.split("::")[1];
-            return Arrays.asList(title.split(" ")).iterator();
+            String title = s.split("::")[2];
+            return Arrays.asList(title.split("|")).iterator();
         });
 
         JavaPairRDD<String, Integer> ones = words.mapToPair((PairFunction<String, String, Integer>) word -> new Tuple2<>(word, 1));
