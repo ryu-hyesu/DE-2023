@@ -1,44 +1,62 @@
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
+import org.apache.spark.sql.SparkSession;
+import scala.Tuple2;
 
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
+import java.util.Iterator;
+import java.util.Locale;
 
-object UBERStudent20201051 {
-  def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("UBERStudent20201051")
-    val sc = new SparkContext(conf)
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 
-    val data = sc.textFile(args(0))
+public final class UBERStudent20201051 {
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println("Usage: UBERStudent20201051 <in-file> <out-file>");
+            System.exit(1);
+        }
 
-    val result = data.map(line => {
-      val parts = line.split(",")
-      val baseNumber = parts(0)
-      val dateString = parts(1)
-      val activeVehicles = parts(2).toInt
-      val trips = parts(3).toInt
+        SparkSession spark = SparkSession.builder()
+                .appName("UBERStudent20201051")
+                .getOrCreate();
 
-      val date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"))
-      val dayOfWeek = date.getDayOfWeek
-      var dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase
+        JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
-      if (dayOfWeekString.equals("THU")) {
-        dayOfWeekString = "THR"
-      }
+        JavaPairRDD<String, String> regionDayTripsVehicles = lines.mapToPair((PairFunction<String, String, String>) line -> {
+            String[] parts = line.split(",");
+            String baseNumber = parts[0];
+            String dateString = parts[1];
+            int activeVehicles = Integer.parseInt(parts[2]);
+            int trips = Integer.parseInt(parts[3]);
 
-      ((baseNumber, dayOfWeekString), (activeVehicles, trips))
-    }).reduceByKey((a, b) => (a._1 + b._1, a._2 + b._2))
+            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
 
-    val formattedResult = result.map {
-      case ((baseNumber, dayOfWeekString), (totalVehicles, totalTrips)) =>
-        s"$baseNumber,$dayOfWeekString,$totalVehicles,$totalTrips"
+            if (dayOfWeekString.equals("THU")) {
+                dayOfWeekString = "THR";
+            }
+
+            String key = baseNumber + "," + dayOfWeekString;
+            String value = activeVehicles + "," + trips;
+
+            return new Tuple2<>(key, value);
+        });
+
+        JavaPairRDD<String, String> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<String, String, String>) (v1, v2) -> {
+            String[] parts1 = v1.split(",");
+            String[] parts2 = v2.split(",");
+
+            int totalTrips = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
+            int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
+
+            return totalVehicles + "," + totalTrips;
+        });
+
+        regionDayTotalTripsVehicles.saveAsTextFile(args[1]);
+
+        spark.stop();
     }
-
-    formattedResult.saveAsTextFile(args(1))
-
-    sc.stop()
-  }
 }
