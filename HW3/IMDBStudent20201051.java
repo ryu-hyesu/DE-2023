@@ -8,38 +8,37 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class IMDBGenreCount implements Serializable {
+public final class JavaWordCount implements Serializable {
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.err.println("Usage: IMDBGenreCount <in-file> <out-file>");
+            System.err.println("Usage: JavaWordCount <in-file> <out-file>");
             System.exit(1);
         }
-
-        SparkSession spark = SparkSession
-                .builder()
-                .appName("IMDBGenreCount")
+        
+        SparkSession spark = SparkSession.builder()
+                .appName("JavaWordCount")
                 .getOrCreate();
-
+        
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
-        JavaPairRDD<String, Integer> counts = lines.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
-            @Override
-            public Iterator<Tuple2<String, Integer>> call(String line) throws Exception {
+        JavaRDD<String> genres = lines.flatMap(new FlatMapFunction<String, String>() {
+            public Iterator<String> call(String line) {
                 String[] parts = line.split("::");
-                String[] genres = parts[2].split("\\|");
-
-                List<Tuple2<String, Integer>> genreCounts = new ArrayList<>();
-
-                for (String genre : genres) {
-                    genreCounts.add(new Tuple2<>(genre, 1));
-                }
-
-                return genreCounts.iterator();
+                String genreString = parts[2];
+                String[] genreArray = genreString.split("\\|");
+                return Arrays.asList(genreArray).iterator();
             }
-        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
-            @Override
-            public Integer call(Integer count1, Integer count2) throws Exception {
-                return count1 + count2;
+        });
+
+        JavaPairRDD<String, Integer> ones = genres.mapToPair(new PairFunction<String, String, Integer>() {
+            public Tuple2<String, Integer> call(String genre) {
+                return new Tuple2<>(genre, 1);
+            }
+        });
+
+        JavaPairRDD<String, Integer> counts = ones.reduceByKey(new Function2<Integer, Integer, Integer>() {
+            public Integer call(Integer x, Integer y) {
+                return x + y;
             }
         });
 
