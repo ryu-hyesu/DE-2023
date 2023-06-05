@@ -35,9 +35,9 @@ public final class UBERStudent20201051 {
             DayOfWeek dayOfWeek = date.getDayOfWeek();
             String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
 
-            if (dayOfWeekString.equals("THU")) {
-                dayOfWeekString = "THR";
-            }
+//             if (dayOfWeekString.equals("THU")) {
+//                 dayOfWeekString = "THR";
+//             }
 
   
             String key = baseNumber + "," + dayOfWeekString;
