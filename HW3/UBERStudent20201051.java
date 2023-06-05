@@ -24,29 +24,32 @@ public final class UBERStudent20201051 {
 
         JavaRDD<String> lines = spark.read().textFile(args[0]).javaRDD();
 
-        JavaPairRDD<String, String> regionDayTripsVehicles = lines.mapToPair((PairFunction<String, String, String>) line -> {
-            String[] parts = line.split(",");
-            String baseNumber = parts[0];
-            String dateString = parts[1];
-            int activeVehicles = Integer.parseInt(parts[2]);
-            int trips = Integer.parseInt(parts[3]);
+        JavaPairRDD<String, String> regionDayTripsVehicles = lines.mapToPair(
+        	new PairFunction<String, String, String>(){ // input, outputK, outputV
+			public Tuple2<String, String> call(String line){
+				String[] parts = line.split(",");
+				    String baseNumber = parts[0];
+				    String dateString = parts[1];
+				    int activeVehicles = Integer.parseInt(parts[2]);
+				    int trips = Integer.parseInt(parts[3]);
 
-            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
-            DayOfWeek dayOfWeek = date.getDayOfWeek();
-            String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
+				    LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
+				    DayOfWeek dayOfWeek = date.getDayOfWeek();
+				    String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US).toUpperCase();
 
-//             if (dayOfWeekString.equals("THU")) {
-//                 dayOfWeekString = "THR";
-//             }
+				  
 
-  
-            String key = baseNumber + "," + dayOfWeekString;
-            String value = activeVehicles + "," + trips;
+			  
+				    String key = baseNumber + "," + dayOfWeekString;
+				    String value = activeVehicles + "," + trips;
 
-            return new Tuple2<>(key, value);
+				    return new Tuple2(key, value);
+			}
+		
         });
 
-        JavaPairRDD<String, String> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey((Function2<String, String, String>) (v1, v2) -> {
+        JavaPairRDD<String, String> regionDayTotalTripsVehicles = regionDayTripsVehicles.reduceByKey(new Function2<String, String, String>(){ 
+        public String call(String v1, String v2){
             String[] parts1 = v1.split(",");
             String[] parts2 = v2.split(",");
 
@@ -54,10 +57,11 @@ public final class UBERStudent20201051 {
             int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
 
             return totalTrips  + "," + totalVehicles ;
-        });
+        }});
 
         regionDayTotalTripsVehicles.saveAsTextFile(args[1]);
 
         spark.stop();
+        
     }
 }
