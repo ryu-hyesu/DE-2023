@@ -41,7 +41,7 @@ public final class UBERStudent20201051 {
 
 			  
 				    String key = baseNumber + "," + dayOfWeekString;
-				    String value = activeVehicles + "," + trips;
+				    String value = trips +","+ activeVehicles;
 
 				    return new Tuple2(key, value);
 			}
@@ -53,8 +53,8 @@ public final class UBERStudent20201051 {
             String[] parts1 = v1.split(",");
             String[] parts2 = v2.split(",");
 
-            int totalTrips = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
-            int totalVehicles = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
+            int totalTrips = Integer.parseInt(parts1[0]) + Integer.parseInt(parts2[0]);
+            int totalVehicles = Integer.parseInt(parts1[1]) + Integer.parseInt(parts2[1]);
 
             return totalTrips  + "," + totalVehicles ;
         }});
