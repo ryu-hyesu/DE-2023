@@ -3,6 +3,7 @@
 
 ### hw1
 [IMDBStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW1/IMDBStudent20201051.java)
+
 Q1. Genre count
 + We need know how many movies falls into each genre.
 + Input file : movie.dat
@@ -16,6 +17,7 @@ Q1. Genre count
 |Children’s|58|
  
 [UBERStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW1/UBERStudent20201051.java)
+ 
 Q2. Trips & Vehicles
 + We need know the number of trips and active vehicles per day and region.
 + Input file : uber.dat
