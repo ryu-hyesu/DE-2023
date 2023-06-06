@@ -9,6 +9,7 @@ Q1. Genre count
 + Input file : movie.dat
 + Output : <Genre> <# of movies>
 + Example
+ 
 |genre|count|
 |--|--|
 |Thriller|182|
