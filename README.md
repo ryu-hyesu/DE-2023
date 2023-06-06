@@ -36,6 +36,7 @@ Q2. Trips & Vehicles
 ### hw2
  
 [IMDBStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW2/IMDBStudent20201051.java)
+ 
 Q1. Top -k movies
 + We need find k fantasy movies whose avg. rating is high
 + Input file : movies.dat & ratings.dat
@@ -48,6 +49,7 @@ Q1. Top -k movies
 
 
 [YouTubeStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW2/YouTubeStudent20201051.java)
+ 
 Q2. Top -K category
 + We need find k categories whose average rating is high.
 + Input file : youtube.dat
