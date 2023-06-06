@@ -22,7 +22,7 @@ Q2. Trips & Vehicles
 + We need know the number of trips and active vehicles per day and region.
 + Input file : uber.dat
 + Output : <region,day> <trips,vehicles>
- 
+
 |region|day|trips|vehicles|
 |--|--|--|--|
 |B02512|MON|1922|122|
@@ -34,15 +34,18 @@ Q2. Trips & Vehicles
 |B02512|SUN|2467|671|
  
 ### hw2
+ 
 [IMDBStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW2/IMDBStudent20201051.java)
 Q1. Top -k movies
 + We need find k fantasy movies whose avg. rating is high
 + Input file : movies.dat & ratings.dat
 + Output : <movie name> <avg. rating>
 + Example)
+
 |movie name|avg|
 |--|--|
 |Jumanji (1995)|4.8|
+
 
 [YouTubeStudent20201051.java](https://github.com/ryu-hyesu/DE-2023/blob/main/HW2/YouTubeStudent20201051.java)
 Q2. Top -K category
@@ -50,6 +53,7 @@ Q2. Top -K category
 + Input file : youtube.dat
 + Output : category avg. rating
 + Example)
+
 |category|rating|
 |--|--|
 |Fantasy|4.8999|
